@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>BrunoTV</title>
+  <style>
+  :root {
+    --bg-dark: #111;
+    --bg-section: #222;
+    --btn-bg: #444;
+    --btn-hover: #00ffd5;
+    --text-color: #fff;
+    --highlight: #00ffd5;
+    --font: 'Segoe UI', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font);
+    background: var(--bg-dark);
+    color: var(--text-color);
+  }
+
+  header {
+    background: #1f1f1f;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: var(--highlight);
+  }
+
+  #busca-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: var(--bg-dark);
+  }
+
+  #busca {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: var(--bg-section);
+    color: var(--text-color);
+  }
+
+  #canal-lista {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    background: var(--bg-section);
+  }
+
+  .canal-btn {
+    padding: 10px 18px;
+    background: var(--btn-bg);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .canal-btn:hover {
+    background: var(--btn-hover);
+    color: #000;
+  }
+
+  .categoria {
+    color: var(--highlight);
+    font-weight: bold;
+    margin: 10px 0 5px;
+    width: 100%;
+    text-align: left;
+    font-size: 1.1rem;
+  }
+
+  #player-container {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    background: #000;
+  }
+
+  #player {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  #fullscreen-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: var(--highlight);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,255,213,0.5);
+    transition: background 0.2s;
+  }
+
+  #fullscreen-btn:hover {
+    background: #00c9b7;
+  }
+
+  audio {
+    width: 100%;
+    background: var(--bg-section);
+    padding: 10px;
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    header {
+      font-size: 1.4rem;
+      padding: 0.8rem;
+    }
+
+    #busca {
+      font-size: 0.95rem;
+      padding: 8px;
+    }
+
+    .canal-btn {
+      font-size: 0.85rem;
+      padding: 8px 12px;
+    }
+
+    #fullscreen-btn {
+      padding: 8px 10px;
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #player-container {
+      height: 60vh;
+    }
+
+    .canal-btn {
+      width: 100%;
+      text-align: center;
+    }
+
+    #canal-lista {
+      flex-direction: column;
+      align-items: center;
+    }
+  } 
+  </style>
+</head>
+<body>
+
+  <header>BrunoTV</header>
+  <div id="busca-container">
+    <input type="text" id="busca" placeholder="🔍 Buscar canal...">
+  </div>
+
+  <div id="canal-lista"></div>
+
+  <div id="player-container">
+    <iframe id="player" src="" allowfullscreen></iframe>
+    <button id="fullscreen-btn" onclick="toggleFullscreen()">Tela cheia</button>
+  </div>
+
+  <audio id="radio" controls></audio>
+
+  <script>
+    const canais = [
+      // === PLUTO TV  ===
+      { nome: "Pluto TV Início", url: "https://pluto.tv/pt/live-tv", categoria: "Pluto TV" },
+      { nome: "Pluto Filmes Ação", url: "https://pluto.tv/pt/live-tv/pluto-tv-filmes-de-acao", categoria: "Pluto TV" },
+      { nome: "Pluto Comédia", url: "https://pluto.tv/pt/live-tv/pluto-tv-comedia", categoria: "Pluto TV" },
+      { nome: "Pluto Terror", url: "https://pluto.tv/pt/live-tv/pluto-tv-terror", categoria: "Pluto TV" },
+      { nome: "Pluto Culinária", url: "https://pluto.tv/pt/live-tv/food-tv", categoria: "Pluto TV" },
+      { nome: "Pluto Infantil", url: "https://pluto.tv/pt/live-tv/nick-jr-club", categoria: "Pluto TV" },
+      { nome: "Pluto Animes", url: "https://pluto.tv/pt/live-tv/pluto-tv-anime", categoria: "Pluto TV" },
+      { nome: "Pluto Cinema Nacional", url: "https://pluto.tv/pt/live-tv/pluto-tv-cinema-nacional", categoria: "Pluto TV" },
+      { nome: "Pluto Cinema Clássico", url: "https://pluto.tv/pt/live-tv/pluto-tv-cinema-classico", categoria: "Pluto TV" },
+      { nome: "Pluto Documentários", url: "https://pluto.tv/pt/live-tv/pluto-tv-documentarios", categoria: "Pluto TV" },
+      { nome: "Pluto True Crime", url: "https://pluto.tv/pt/live-tv/pluto-tv-investigacao", categoria: "Pluto TV" },
+      { nome: "Pluto Novelas", url: "https://pluto.tv/pt/live-tv/pluto-tv-novelas", categoria: "Pluto TV" },
+      { nome: "Pluto Retromania", url: "https://pluto.tv/pt/live-tv/retromania", categoria: "Pluto TV" },
+      { nome: "Pluto Cine Suspense", url: "https://pluto.tv/pt/live-tv/cine-suspense", categoria: "Pluto TV" },
+
+      // === TV AO VIVO ===
+
+      { nome: "Record News", url: "https://pluto.tv/br/live-tv/6102e04e9ab1db0007a980a1?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTj_rwCCBY8ncRqLW_XlAZp21ev1-JFH9VGndI2U2oRHtlkUu-8Rh4aAjdtEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "Band", url: "https://www.band.uol.com.br/ao-vivo", categoria: "TV ao Vivo" },
+      { nome: "Jovem Pan", url: "https://pluto.tv/br/live-tv/6317ba014d4d040007227f72?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTsKrFbd9mGnoPSTxmKBMFKMPjaPiLpkNgSfJzQ4rAtZ1MfFuTWxyEaAh9bEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "New Brasil", url: "https://pluto.tv/br/live-tv/645a99282858cb0008ea8378?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTsKrFbd9mGnoPSTxmKBMFKMPjaPiLpkNgSfJzQ4rAtZ1MfFuTWxyEaAh9bEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "Cultura Fast", url: "https://pluto.tv/br/live-tv/62e010e6cd663f0007e57dc8?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTsKrFbd9mGnoPSTxmKBMFKMPjaPiLpkNgSfJzQ4rAtZ1MfFuTWxyEaAh9bEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "Canal Uol", url: "https://pluto.tv/br/live-tv/64b9370b409629000802d32b?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTsKrFbd9mGnoPSTxmKBMFKMPjaPiLpkNgSfJzQ4rAtZ1MfFuTWxyEaAh9bEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "Nick Jr", url: "https://pluto.tv/br/live-tv/6824ce95f09106f4b18f4114?utm_source=google&utm_medium=pmax&utm_campaign=22819274564&utm_content=183506203435&utm_term=pluto+tv&utm_creative=765168390889&device=c&gad_source=1&gad_campaignid=22819274564&gbraid=0AAAAAB3xGeAK8kVEHWhux0PXzivqWTeSW&gclid=Cj0KCQjwtMHEBhC-ARIsABua5iTsKrFbd9mGnoPSTxmKBMFKMPjaPiLpkNgSfJzQ4rAtZ1MfFuTWxyEaAh9bEALw_wcB", categoria: "TV ao Vivo" },
+      { nome: "TV Brasil", url: "https://play.ebc.com.br/tvs", categoria: "TV ao Vivo" },
+      { nome: "SBT", url: "https://mais.sbt.com.br/", categoria: "TV ao Vivo" },
+      { nome: "CNBC", url: "https://www.soultv.com.br/channel/298", categoria: "TV ao Vivo" },
+      { nome: "CNN Brasil", url: "https://www.soultv.com.br/channel/141", categoria: "TV ao Vivo" },
+      { nome: "BR SuperTV", url: "https://www.soultv.com.br/channel/98", categoria: "TV ao Vivo" },
+      { nome: "Tarde Cinemais", url: "https://www.soultv.com.br/channel/193", categoria: "TV ao Vivo" },
+
+      // === Radios ===
+
+        { nome: "89 Radio Rock", url: "https://www.radios.com.br/aovivo/radio-89-fm-radio-rock/31289", categoria: "Rádio" },
+        { nome: "CBN SP", url: "https://www.radios.com.br/aovivo/radio-cbn-sao-paulo-905-fm/8816", categoria: "Rádio" },
+        { nome: "Antena 1", url: "https://www.radios.com.br/aovivo/radio-antena-1-947-fm/9505", categoria: "Rádio" },
+        { nome: "Energia", url: "https://www.radios.com.br/aovivo/radio-energia-977-fm/13065", categoria: "Rádio" },
+        { nome: "Rádio Bandeirantes", url: "https://www.radios.com.br/aovivo/radio-bandeirantes-909-fm-863-fm/10410", categoria: "Rádio" },
+        { nome: "CBN SP", url:"https://www.radios.com.br/aovivo/radio-cbn-sao-paulo-905-fm/8816", categoria: "Rádio" },
+          
+
+      
+     // === Filmes ===
+       { nome: "NetMovies", url: "https://www.netmovies.com.br/player/details/453072", categoria: "Filmes" },
+
+    // === Jogos Retro ===
+    { nome: "Pac-Man", url: "https://www.minijogos.com.br/jogo/pac-man-arcade-original", categoria: "Jogos" },
+    { nome: "Bomberman", url: "https://www.minijogos.com.br/jogo/obby-bomberman", categoria: "Jogos" },
+    { nome: "Captitão Comando", url: "https://www.retrogames.cc/snes-games/captain-commando-europe.html", categoria: "Jogos" },
+    { nome: "DinoCity", url: "https://www.retrogames.cc/snes-games/dino-city-europe.html", categoria: "Jogos" },
+
+    ];
+
+    const lista = document.getElementById("canal-lista");
+    const player = document.getElementById("player");
+    const audio = document.getElementById("radio");
+    const busca = document.getElementById("busca");
+
+    function renderizar(filtro = "") {
+      lista.innerHTML = "";
+      const canaisFiltrados = canais.filter(c => c.nome.toLowerCase().includes(filtro.toLowerCase()));
+      
+      // Agrupar por categoria
+      const categorias = {};
+      canaisFiltrados.forEach(c => {
+        if (!categorias[c.categoria]) categorias[c.categoria] = [];
+        categorias[c.categoria].push(c);
+      });
+
+      Object.keys(categorias).forEach(categoria => {
+        const divCategoria = document.createElement("div");
+        divCategoria.className = "categoria";
+        divCategoria.textContent = categoria;
+        lista.appendChild(divCategoria);
+
+        categorias[categoria].forEach(c => {
+          const btn = document.createElement("button");
+          btn.className = "canal-btn";
+          btn.textContent = c.nome;
+          btn.onclick = () => {
+            if (c.url.startsWith("AUDIO::")) {
+              player.src = "";
+              player.style.display = "none";
+              audio.src = c.url.replace("AUDIO::", "");
+              audio.style.display = "block";
+              audio.play();
+            } else {
+              audio.pause();
+              audio.style.display = "none";
+              player.src = c.url;
+              player.style.display = "block";
+            }
+          };
+          lista.appendChild(btn);
+        });
+      });
+    }
+
+    busca.addEventListener("input", () => renderizar(busca.value));
+    renderizar();
+
+    function toggleFullscreen() {
+      const el = document.fullscreenElement ? document.exitFullscreen() :
+        (player.style.display !== "none" ? player.requestFullscreen() : audio.requestFullscreen());
+    }
+  </script>
+
+</body>
+</html>
